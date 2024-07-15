@@ -70,29 +70,24 @@ def handle_batch(batch=None):
 
 @wrap_objective()
 def neuron(layer, unit, h=None, w=None, batch=None):
-    
+    """Visualize a specific neuron in a specific layer"""
     @handle_batch(batch)
     def inner(model):
         layer_t = model(layer)
         layer_t = _extract_act_pos(layer_t, h, w)
-        if isinstance(unit,int):
-            return -layer_t[: ,:, unit].mean()
-        else:
-            return -dot_product(layer_t, unit.to(layer_t.device)).mean()
+        return -layer_t[:, :, unit].mean()
 
     return inner
-
 
 @wrap_objective()
 def channel(layer, unit, batch=None):
     """Visualize a single channel"""
     @handle_batch(batch)
     def inner(model):
-        if isinstance(unit,int):
-            return -model(layer)[: ,:, unit].mean()
-        else:
-            return -dot_product(model(layer), unit.to(model(layer).device)).mean()
+        return -model(layer)[:, :, unit].mean()
+
     return inner
+
 
 
 @wrap_objective()
