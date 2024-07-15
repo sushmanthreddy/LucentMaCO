@@ -1,5 +1,8 @@
-
+from __future__ import absolute_import, division, print_function
 import torch
+import numpy as np
+
+
 
 def _make_arg_str(arg):
     arg = str(arg)
@@ -52,5 +55,42 @@ def linconv_reshape(x,ref):
     return x
 
 
+
+def clip_percentile(array, percentile=0.1):
+    """
+    Clip the values of an array at a specified percentile.
+
+    Args:
+        array (np.ndarray): The input array to be clipped.
+        percentile (float, optional): The percentile value for clipping. Defaults to 0.1.
+
+    Returns:
+        np.ndarray: The clipped array.
+    """
+    return np.clip(array, None, np.percentile(array, 100 - percentile))
+
+def torch_to_numpy(tensor):
+    """
+    Convert a PyTorch tensor to a NumPy array.
+
+    Args:
+        tensor (torch.Tensor): The input tensor to be converted.
+
+    Returns:
+        np.ndarray: The converted NumPy array.
+    """
+    try:
+        array = tensor.detach().cpu().numpy()
+    except:
+        array = np.array(tensor)
+
+    if len(array.shape) == 3:
+        if array.shape[0] == 3:
+            array = np.moveaxis(array, 0, -1)
+    elif len(array.shape) == 4:
+        if array.shape[1] == 3:
+            array = np.moveaxis(array, 1, -1)
+
+    return array.astype(np.float32)
 
     
