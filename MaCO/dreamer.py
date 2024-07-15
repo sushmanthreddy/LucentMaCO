@@ -5,12 +5,12 @@ import torch.nn.functional as F
 import numpy as np
 from tqdm import tqdm
 import warnings
-from MaCO.transformations import resize, range_normalize, compose
+from transformations import resize, range_normalize, compose
 from preconditioning import FourierPhase
 from image import plot, plot_alpha
 from hooker import HookModel
 from transformations import standard_box_transforms
-from objective import as_objective,l2_compare
+from objective import as_objective ,l2_compare
 
 
 default_model_input_size = (224,224)
