@@ -47,41 +47,6 @@ class Objective():
     def __sub__(self, other):
         return self + (-1 * other)
 
-    # def __mul__(self, other):
-    #     if isinstance(other, (int, float)):
-    #         objective_func = lambda model: other * self(model)
-    #         return Objective(objective_func, name=self.name, description=self.description)
-    #     else:
-    #         # Note: In original Lucid library, objectives can be multiplied with non-numbers
-    #         # Removing for now until we find a good use case
-    #         raise TypeError('Can only multiply by int or float. Received type ' + str(type(other)))
-
-    def __mul__(self, other):
-        if isinstance(other, (int, float)):
-            # Existing functionality for scalar multiplication
-            objective_func = lambda model: other * self(model)
-            return Objective(objective_func, name=self.name, description=self.description)
-        elif isinstance(other, Objective):
-            # New functionality for multiplying two Objective instances
-            objective_func = lambda model: self(model) * other(model)
-            name = " * ".join(filter(None, [self.name, other.name]))
-            description = "Product(" + " * ".join(filter(None, [self.description, other.description])) + ")"
-            return Objective(objective_func, name=name, description=description)
-        else:
-            # Type not supported
-            raise TypeError(f'Can only multiply by int, float, or Objective. Received type {type(other)}')
-
-
-
-
-    def __truediv__(self, other):
-        if isinstance(other, (int, float)):
-            return self.__mul__(1 / other)
-        else:
-            raise TypeError('Can only divide by int or float. Received type ' + str(type(other)))
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
 
     def __radd__(self, other):
         return self.__add__(other)
