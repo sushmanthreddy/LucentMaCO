@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import numpy as np
 from tqdm import tqdm
 import warnings
-from transformations import resize, range_normalize, compose
+from MaCO.transformations import resize, range_normalize, compose
 from preconditioning import FourierPhase
 from image import plot, plot_alpha
 from hooker import HookModel
