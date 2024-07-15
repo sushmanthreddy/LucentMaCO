@@ -1,8 +1,12 @@
+from __future__ import absolute_import, division, print_function
+
+import os
 import torch
 import torch.nn.functional as F
 from torchvision.transforms import ToTensor
 from PIL import Image
-import os
+import numpy as np
+
 
 totensor = ToTensor()
 
@@ -131,6 +135,61 @@ def uniform_gaussian_noise(noise_std=0.02):
     
     return inner
 
+
+def box_crop(
+    box_min_size=0.85,
+    box_max_size=0.95,
+    box_loc_std=0.05,
+):
+    """returns a function that will take an image and randomly crop it into a batch.
+
+    Args:
+        box_min_size (float, optional): minimum box size (as fraction of canevas size). Defaults to 0.10.
+        box_max_size (float, optional): minimum box size (as fraction of canevas size). Defaults to 0.35.
+        box_loc_std (float, optional): std of box positions (sampled normally around image center). Defaults to 0.2.
+        noise_std (float, optional): std of the noise added to the image. Defaults to 0.05.
+        model_input_size (tuple, optional): once the crop is made it is interpolated to this size
+
+    Returns:
+        (callable): a function that takes an image tensor of shape (b,c,h,w)
+                    and returns a batch tensor of shape (b+nb_crops-1,c,h,w).
+                    This function operates on the last image in the batch,
+                    replacing it with cropped resized versions.
+    """
+
+    def inner(image_t):
+        """
+        Args: 
+            x (model input tensor): 
+            batch_idx
+        Returns:
+            batch tensor of shape (b,c,h,w)
+        """
+
+
+        x = image_t
+        im_b, im_c, im_w, im_h = x.shape
+
+        delta_x = torch.rand(1) * (box_max_size - box_min_size) + box_min_size
+        delta_y = delta_x
+
+        x0 = torch.clamp(
+            torch.randn(1) * box_loc_std + 0.5, delta_x / 2.0, 1 - delta_x / 2.0
+        )
+        y0 = torch.clamp(
+            torch.randn(1) * box_loc_std + 0.5, delta_y / 2.0, 1 - delta_y / 2.0
+        )
+
+        x = x[
+                :, 
+                :, 
+                int((x0 - delta_x / 2.0) * im_w): int((x0 + delta_x / 2.0) * im_w), 
+                int((y0 - delta_y / 2.0) * im_h): int((y0 + delta_y / 2.0) * im_h)
+             ]
+
+        return x
+
+    return inner
 
 
 standard_box_transforms = [
