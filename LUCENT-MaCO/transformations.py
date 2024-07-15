@@ -1,10 +1,46 @@
 import torch
 import torch.nn.functional as F
+from torchvision.transforms import ToTensor
+from PIL import Image
+import os
+
+totensor = ToTensor()
 
 
 default_model_input_size = (224,224)
 default_img_size = (512,512) 
 default_model_input_range = (-2,2) 
+
+
+def img_to_img_tensor(image, target_size=default_img_size, crop=True):
+    """
+    Convert an image to a tensor and resize it to the specified size.
+
+    Args:
+        image (str or PIL.Image or torch.Tensor): The input image. Can be a file path, a PIL image, or a torch tensor.
+        target_size (tuple, optional): The target size for resizing the image. Defaults to default_img_size.
+        crop (bool, optional): Whether to crop the image before resizing. Defaults to True.
+
+    Returns:
+        torch.Tensor: The image converted to a tensor and resized to the target size.
+    """
+    if isinstance(image, str):
+        image = Image.open(os.path.abspath(image))
+        if image.mode == 'RGBA':
+            image = image.convert('RGB')
+        if image.mode == 'L':
+            image = image.convert('RGB')  # Convert grayscale to RGB
+
+    if not isinstance(image, torch.Tensor): 
+        image = totensor(image)
+
+    if image.dim() == 3: 
+        image = image.unsqueeze(0)  # Shape now is (1, C, H, W)
+
+    # Use interpolate to resize
+    resized_image_tensor = F.interpolate(image, size=target_size).clamp(min=0.0, max=1.0)
+    
+    return resized_image_tensor
 
 
 def box_crop_2(box_min_size=0.05, box_max_size=0.99):
